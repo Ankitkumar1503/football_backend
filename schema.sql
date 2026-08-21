@@ -1,0 +1,33 @@
+-- Schema setup for TOUCHES Footballer Athletics Database
+
+CREATE DATABASE IF NOT EXISTS touches_db;
+USE touches_db;
+
+-- Registrations Table
+CREATE TABLE IF NOT EXISTS `registrations` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `firstName` VARCHAR(100) NOT NULL,
+  `lastName` VARCHAR(100) DEFAULT NULL,
+  `country` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(255) DEFAULT NULL,
+  `footPreference` ENUM('left', 'right') NOT NULL,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- App Stats Table
+CREATE TABLE IF NOT EXISTS `stats` (
+  `id` INT PRIMARY KEY DEFAULT 1,
+  `total` INT DEFAULT 342891,
+  `leftCount` INT DEFAULT 131670,
+  `rightCount` INT DEFAULT 211221,
+  `downloads` INT DEFAULT 312000,
+  `countries` INT DEFAULT 142,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Initial Stats Record
+INSERT INTO `stats` (`id`, `total`, `leftCount`, `rightCount`, `downloads`, `countries`)
+VALUES (1, 342891, 131670, 211221, 312000, 142)
+ON DUPLICATE KEY UPDATE `id` = 1;
