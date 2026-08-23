@@ -92,12 +92,12 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 // Start Server & Connect Database
-const startServer = async () => {
-  await connectDB();
-
+const startServer = () => {
   const HOST = '0.0.0.0';
   app.listen(PORT, HOST, () => {
     console.log(`🚀 TOUCHES Express Server listening on http://${HOST}:${PORT} (Port: ${PORT})`);
+    // Connect DB asynchronously so app binds to PORT immediately
+    connectDB();
   });
 };
 
