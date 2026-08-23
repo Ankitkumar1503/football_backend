@@ -23,7 +23,9 @@ export const getAdminUsers = async (req, res, next) => {
         email: user.email || 'N/A',
         footPreference: user.footPreference || 'left',
         registrationDate: user.createdAt,
-        paymentStatus: user.id % 2 === 0 ? 'paid' : 'unpaid',
+        paymentStatus: user.paymentStatus || 'unpaid',
+        paymentAmount: user.paymentAmount || 0,
+        paymentDate: user.paymentDate || null,
       }));
     } catch (dbError) {
       console.warn('⚠️ DB read failed, serving fallback data for admin dashboard:', dbError.message);
