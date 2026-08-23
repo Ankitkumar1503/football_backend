@@ -39,8 +39,15 @@ export const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ MySQL Database connected successfully via Sequelize.');
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized.');
+
+    if (process.env.RUN_DB_SYNC === 'true') {
+      console.log('🔄 Running database model synchronization (alter mode)...');
+      await sequelize.sync({ alter: true });
+      console.log('✅ Database models synchronized (alter mode).');
+    } else {
+      await sequelize.sync();
+      console.log('✅ Database connection verified (lightweight sync mode).');
+    }
   } catch (error) {
     console.warn('⚠️ Could not connect to MySQL server:', error.message);
     console.warn('⚠️ Server will run in API fallback mode.');
