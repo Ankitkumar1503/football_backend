@@ -40,16 +40,27 @@ console.log('🔒 Configured CORS Allowed Origins:', allowedOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    const cleanOrigin = origin.trim().replace(/\/+$/, '');
-
-    if (allowedOrigins.includes(cleanOrigin) || /\.vercel\.app$/.test(cleanOrigin)) {
+    // Mobile apps, server-to-server, curl have no origin header
+    if (!origin) {
+      console.log('🔍 [CORS DEBUG] Request received with NO Origin header (Server-to-Server / Curl / Same-Origin) -> ALLOWED');
       return callback(null, true);
     }
 
-    console.warn(`⚠️ CORS blocked request from origin: ${origin}`);
-    return callback(new Error(`CORS policy error: Origin ${origin} not allowed`));
+    const cleanOrigin = origin.trim().replace(/\/+$/, '');
+    const isVercelApp = /\.vercel\.app$/.test(cleanOrigin);
+    const isExplicitlyAllowed = allowedOrigins.includes(cleanOrigin);
+
+    console.log(`🔍 [CORS DEBUG] Incoming Origin: "${origin}" | Cleaned: "${cleanOrigin}"`);
+    console.log(`🔍 [CORS DEBUG] Allowed Whitelist:`, allowedOrigins);
+    console.log(`🔍 [CORS DEBUG] Is Whitelisted: ${isExplicitlyAllowed} | Is Vercel Subdomain: ${isVercelApp}`);
+
+    if (isExplicitlyAllowed || isVercelApp) {
+      console.log(`✅ [CORS DEBUG] ACCESS GRANTED for origin: "${cleanOrigin}"`);
+      return callback(null, true);
+    }
+
+    console.warn(`❌ [CORS DEBUG] ACCESS DENIED for origin: "${cleanOrigin}"`);
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
