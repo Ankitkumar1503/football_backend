@@ -6,16 +6,48 @@ import dotenv from 'dotenv';
 import apiRoutes from './routes/api.js';
 import { connectDB } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { handleWebhook } from './controllers/paymentController.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security & Utility Middlewares
-app.use(helmet());
-app.use(cors());
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.EXTERNAL_APP_URL,
+  process.env.ALLOWED_ORIGINS,
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+]
+  .filter(Boolean)
+  .flatMap((url) => url.split(',').map((o) => o.trim()));
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (/\.vercel\.app$/.test(origin)) return true;
+  return false;
+};
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, origin || true);
+      } else {
+        callback(null, origin || true);
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(morgan('dev'));
+
+// STRIPE RAW WEBHOOK ENDPOINT (Must come BEFORE express.json parser)
+app.post('/api/payment/webhook', express.raw({ type: '*/*' }), handleWebhook);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

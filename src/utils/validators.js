@@ -5,6 +5,7 @@ export const registrationSchema = z.object({
   lastName: z.string().max(100).optional().nullable(),
   country: z.string().min(1, 'Country is required').max(100),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  password: z.string().optional().nullable(),
   footPreference: z.enum(['left', 'right'], {
     errorMap: () => ({ message: 'Foot preference must be either left or right' }),
   }),
