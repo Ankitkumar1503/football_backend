@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { Registration } from '../models/Registration.js';
 import { Stats } from '../models/Stats.js';
 import { registrationSchema } from '../utils/validators.js';
@@ -44,39 +43,10 @@ export const createRegistration = async (req, res, next) => {
       updateInMemoryStats(validatedData.footPreference);
     }
 
-    const createdUser = newRecord || validatedData;
-    const fullName = [createdUser.firstName, createdUser.lastName].filter(Boolean).join(' ') || 'Player';
-
-    const tokenPayload = {
-      id: createdUser.id || 1,
-      email: createdUser.email,
-      firstName: createdUser.firstName,
-      lastName: createdUser.lastName,
-      footPreference: createdUser.footPreference,
-      paymentStatus: createdUser.paymentStatus || 'unpaid',
-    };
-
-    const token = jwt.sign(
-      tokenPayload,
-      process.env.JWT_SECRET || 'touches_secret_key_jwt_2026_secure',
-      { expiresIn: '7d' }
-    );
-
     return res.status(201).json({
       success: true,
       message: 'Player registered successfully!',
-      token,
-      user: {
-        id: createdUser.id,
-        name: fullName,
-        firstName: createdUser.firstName,
-        lastName: createdUser.lastName,
-        email: createdUser.email,
-        footPreference: createdUser.footPreference,
-        country: createdUser.country,
-        paymentStatus: createdUser.paymentStatus || 'unpaid',
-      },
-      data: createdUser,
+      data: newRecord || validatedData,
     });
   } catch (error) {
     if (error.name === 'ZodError') {
