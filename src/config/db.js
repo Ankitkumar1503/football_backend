@@ -24,12 +24,15 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
 
 export const connectDB = async () => {
   try {
-    await sequelize.authenticate();
-    console.log('✅ MySQL Database connected successfully via Sequelize.');
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized.');
+    if (process.env.RUN_DB_SYNC === 'true') {
+      await sequelize.sync({ alter: true });
+      console.log('Database models synchronized (alter mode).');
+    } else {
+      await sequelize.authenticate();
+      console.log('Database connection verified (lightweight mode).');
+    }
   } catch (error) {
     console.warn('⚠️ Could not connect to MySQL server:', error.message);
-    console.warn('⚠️ Server will run in API fallback mode. Ensure MySQL service is running on 127.0.0.1:3306.');
+    console.warn('⚠️ Server will run in API fallback mode. Ensure MySQL service is running.');
   }
 };
