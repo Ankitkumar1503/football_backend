@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { Registration } from '../models/Registration.js';
 import { Stats } from '../models/Stats.js';
 import { registrationSchema } from '../utils/validators.js';
@@ -43,10 +44,38 @@ export const createRegistration = async (req, res, next) => {
       updateInMemoryStats(validatedData.footPreference);
     }
 
+    const savedUser = newRecord || validatedData;
+    const fullName = [savedUser.firstName, savedUser.lastName].filter(Boolean).join(' ') || savedUser.name || 'Player';
+
+    const tokenPayload = {
+      id: savedUser.id || 1,
+      email: savedUser.email,
+      firstName: savedUser.firstName,
+      lastName: savedUser.lastName,
+      footPreference: savedUser.footPreference,
+      paymentStatus: savedUser.paymentStatus || 'unpaid',
+    };
+
+    const token = jwt.sign(
+      tokenPayload,
+      process.env.JWT_SECRET || 'touches_secret_key_jwt_2026_secure',
+      { expiresIn: '7d' }
+    );
+
     return res.status(201).json({
       success: true,
       message: 'Player registered successfully!',
-      data: newRecord || validatedData,
+      token,
+      data: {
+        id: savedUser.id,
+        name: fullName,
+        firstName: savedUser.firstName,
+        lastName: savedUser.lastName,
+        email: savedUser.email,
+        footPreference: savedUser.footPreference,
+        country: savedUser.country,
+        paymentStatus: savedUser.paymentStatus || 'unpaid',
+      },
     });
   } catch (error) {
     if (error.name === 'ZodError') {
