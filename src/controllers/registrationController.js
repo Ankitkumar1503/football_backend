@@ -40,9 +40,11 @@ export const createRegistration = async (req, res, next) => {
       }
       await statsRecord.save();
     } catch (dbErr) {
-      // In-memory fallback if MySQL not running
-      updateInMemoryStats(validatedData.footPreference);
+      console.warn('⚠️ DB registration warning, using memory stats update:', dbErr.message);
     }
+
+    // Always update in-memory stats fallback so stats remain accurate across memory/DB state
+    updateInMemoryStats(validatedData.footPreference);
 
     const savedUser = newRecord || validatedData;
     const fullName = [savedUser.firstName, savedUser.lastName].filter(Boolean).join(' ') || savedUser.name || 'Player';
